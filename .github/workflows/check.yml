@@ -1,0 +1,37 @@
+name: Test merge queue
+
+on:
+  pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-merge-queue:
+    name: Standard - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      # extract branch name or checkout devel branch for scheduled events
+      - name: Sleep
+        run: |
+          sleep 120
+
+  check:
+    if: always()
+    name: check-test-merge-queue
+
+    needs:
+      - test-merge-queue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
+
